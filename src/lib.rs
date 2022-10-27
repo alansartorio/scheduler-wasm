@@ -1,7 +1,9 @@
+#[cfg(test)]
+mod tests;
 mod utils;
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     iter::FromIterator,
     ops::{Bound, RangeBounds},
     sync::{Arc, Mutex},
@@ -38,22 +40,11 @@ pub enum Semester {
 }
 
 #[wasm_bindgen]
-pub async fn load_from_api(year: u32, semester: Semester) {
+pub async fn load_from_api(api_host: String, year: u32, semester: Semester) {
     let mut opts = RequestInit::new();
     opts.method("GET").mode(RequestMode::Cors);
     let window = window().unwrap();
-    let mut url = Url::parse(
-        &window
-            .document()
-            .unwrap()
-            .location()
-            .unwrap()
-            .href()
-            .unwrap(),
-    )
-    .unwrap()
-    .join("/api")
-    .unwrap();
+    let mut url = Url::parse(&api_host).unwrap();
     url.set_query(Some(&format!(
         "year={}&period={}",
         year,
