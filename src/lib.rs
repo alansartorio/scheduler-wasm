@@ -31,8 +31,6 @@ use scheduler::loaders::json_loader;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{window, Request, RequestInit, RequestMode, Response};
 
-use url::Url;
-
 #[wasm_bindgen]
 pub enum Semester {
     First,
@@ -44,18 +42,18 @@ pub async fn load_from_api(api_host: String, year: u32, semester: Semester) {
     let mut opts = RequestInit::new();
     opts.method("GET").mode(RequestMode::Cors);
     let window = window().unwrap();
-    let mut url = Url::parse(&api_host).unwrap();
-    url.set_query(Some(&format!(
-        "year={}&period={}",
+
+    let url = format!(
+        "{}/year={}&period={}",
+        api_host,
         year,
         match semester {
             Semester::First => "FirstSemester",
             Semester::Second => "SecondSemester",
         }
-    )));
+    );
 
-    //location.set_pathname("/api?").unwrap();
-    let request = Request::new_with_str_and_init(url.as_str(), &opts).unwrap();
+    let request = Request::new_with_str_and_init(&url, &opts).unwrap();
     let resp = JsFuture::from(window.fetch_with_request(&request))
         .await
         .unwrap();

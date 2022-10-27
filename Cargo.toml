@@ -16,7 +16,6 @@ scheduler = { git = "https://github.com/alansartorio/scheduler", default-feature
 console_error_panic_hook = { version = "0.1.7", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 wasm-bindgen-futures = "0.4.33"
-url = "2.3.1"
 js-sys = "0.3.60"
 serde = "1.0.147"
 serde_json = "1.0.87"
