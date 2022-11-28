@@ -44,7 +44,7 @@ pub async fn load_from_api(api_host: String, year: u32, semester: Semester) {
     let window = window().unwrap();
 
     let url = format!(
-        "{}/year={}&period={}",
+        "{}?year={}&period={}",
         api_host,
         year,
         match semester {
