@@ -9,7 +9,7 @@ use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{window, Request, RequestInit, RequestMode, Response};
 
-use crate::{Semester, SubjectInfo};
+use crate::{Semester, StringArray, SubjectInfo};
 
 async fn fetch(url: &str) -> String {
     let mut opts = RequestInit::new();
@@ -54,17 +54,27 @@ fn get_subjects(career_plan: &CareerPlan) -> impl Iterator<Item = &SubjectEntry>
 
 #[wasm_bindgen]
 impl SubjectPlan {
-    pub fn get_subject_dependencies(&self, code: Code) -> Option<Vec<Code>> {
+    pub fn get_subject_dependencies(&self, code: String) -> Option<StringArray> {
+        let code = code.parse().unwrap();
+        get_subjects(&self.data).find(|s| s.code == code).map(|s| {
+            s.dependencies
+                .0
+                .iter()
+                .map(|c| c.to_string())
+                .collect::<Vec<_>>()
+                .into()
+        })
+    }
+
+    pub fn get_subjects(&self) -> StringArray {
         get_subjects(&self.data)
-            .find(|s| s.code == code)
-            .map(|s| s.dependencies.0.clone())
+            .map(|s| s.code.to_string())
+            .collect::<Vec<_>>()
+            .into()
     }
 
-    pub fn get_subjects(&self) -> Vec<Code> {
-        get_subjects(&self.data).map(|s| s.code).collect()
-    }
-
-    pub fn get_subject_info(&self, code: Code) -> Option<SubjectInfo> {
+    pub fn get_subject_info(&self, code: String) -> Option<SubjectInfo> {
+        let code = code.parse().unwrap();
         get_subjects(&self.data)
             .find(|s| s.code == code)
             .map(|s| SubjectInfo {

@@ -11,7 +11,7 @@ use std::{
 
 use anyhow::{anyhow, Result};
 use api::SUBJECTS;
-use js_sys::Array;
+use js_sys::{Array, JsString};
 use scheduler::{
     models::{Code, Subject, SubjectCommision},
     option_generator::filters::{ChoiceIterator, CreditCount, SubjectCount},
@@ -110,6 +110,18 @@ impl From<StringArray> for Vec<String> {
             .iter()
             .map(|v| v.as_string().expect("Must be a string array"))
             .collect()
+    }
+}
+
+impl From<Vec<String>> for StringArray {
+    fn from(sa: Vec<String>) -> Self {
+        //serde_wasm_bindgen::to_value::<Vec<String>>(&sa.into()).unwrap().into()
+        JsValue::from(
+            sa.into_iter()
+                .map(|v| v.parse::<JsString>().unwrap())
+                .collect::<Array>(),
+        )
+        .into()
     }
 }
 
