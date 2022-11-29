@@ -180,23 +180,19 @@ export interface Time {
 }
 
 export interface Choice {
-    subjects: {
-        [key: string]: {
+    subjects: Map<String, {
             name: string,
             credits: number,
             commission: string,
-        },
-    },
-    week: {
-        [key in DaysOfTheWeek]: {
+    }>,
+    week: Map<DaysOfTheWeek, {
             subject: string,
             building?: string,
             span: {
                 start: Time,
                 end: Time,
             },
-        }[];
-    },
+    }[]>,
 }
 "#;
 
