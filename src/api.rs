@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use scheduler::{
-    json_parser::{CareerPlan, Code},
+    json_parser::{CareerPlan, Code, Entry, SubjectEntry},
     loaders::json_loader,
     models::Subject,
 };
@@ -9,7 +9,7 @@ use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{window, Request, RequestInit, RequestMode, Response};
 
-use crate::Semester;
+use crate::{Semester, SubjectInfo};
 
 async fn fetch(url: &str) -> String {
     let mut opts = RequestInit::new();
@@ -36,10 +36,41 @@ pub struct SubjectPlan {
     data: CareerPlan,
 }
 
+fn get_subjects(career_plan: &CareerPlan) -> impl Iterator<Item = &SubjectEntry> {
+    career_plan.sections.iter().flat_map(|s| {
+        s.terms.iter().flat_map(|t| {
+            t.term.iter().flat_map(|t| {
+                t.entries.entry.iter().filter_map(|e| {
+                    if let Entry::Subject(subject) = e {
+                        Some(subject)
+                    } else {
+                        None
+                    }
+                })
+            })
+        })
+    })
+}
+
 impl SubjectPlan {
-    pub fn get_subject_dependencies(&self, code: Code) -> Vec<Code> {
-        //self.data
-        unimplemented!();
+    pub fn get_subject_dependencies(&self, code: Code) -> Option<Vec<Code>> {
+        get_subjects(&self.data)
+            .find(|s| s.code == code)
+            .map(|s| s.dependencies.0.clone())
+    }
+
+    pub fn get_subjects(&self) -> Vec<Code> {
+        get_subjects(&self.data).map(|s| s.code).collect()
+    }
+
+    pub fn get_subject_info(&self, code: Code) -> Option<SubjectInfo> {
+        get_subjects(&self.data)
+            .find(|s| s.code == code)
+            .map(|s| SubjectInfo {
+                code: s.code,
+                name: s.name.clone(),
+                credits: s.credits,
+            })
     }
 }
 
@@ -50,6 +81,7 @@ pub struct Api {
 
 #[wasm_bindgen]
 impl Api {
+    #[wasm_bindgen(constructor)]
     pub fn new(url_base: String) -> Self {
         Self { url_base }
     }
