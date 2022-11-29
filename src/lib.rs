@@ -6,16 +6,18 @@ use std::{
     collections::HashSet,
     iter::FromIterator,
     ops::{Bound, RangeBounds},
-    sync::{Arc, Mutex},
+    sync::Arc,
 };
 
 use anyhow::{anyhow, Result};
+use api::SUBJECTS;
 use js_sys::Array;
 use scheduler::{
     models::{Code, Subject, SubjectCommision},
     option_generator::filters::{ChoiceIterator, CreditCount, SubjectCount},
 };
-use wasm_bindgen::{prelude::*, JsCast};
+use wasm_bindgen::prelude::*;
+mod api;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global allocator.
 #[cfg(feature = "wee_alloc")]
@@ -27,50 +29,11 @@ extern "C" {
     fn alert(s: &str);
 }
 
-use scheduler::loaders::json_loader;
-use wasm_bindgen_futures::JsFuture;
-use web_sys::{window, Request, RequestInit, RequestMode, Response};
-
 #[wasm_bindgen]
 pub enum Semester {
     First,
     Second,
 }
-
-#[wasm_bindgen]
-pub async fn load_from_api(api_host: String, year: u32, semester: Semester) {
-    let mut opts = RequestInit::new();
-    opts.method("GET").mode(RequestMode::Cors);
-    let window = window().unwrap();
-
-    let url = format!(
-        "{}?year={}&period={}",
-        api_host,
-        year,
-        match semester {
-            Semester::First => "FirstSemester",
-            Semester::Second => "SecondSemester",
-        }
-    );
-
-    let request = Request::new_with_str_and_init(&url, &opts).unwrap();
-    let resp = JsFuture::from(window.fetch_with_request(&request))
-        .await
-        .unwrap();
-
-    let resp: Response = resp.dyn_into().unwrap();
-    let body = JsFuture::from(resp.text().unwrap())
-        .await
-        .unwrap()
-        .as_string()
-        .unwrap();
-
-    let data = json_loader::load_from_string(&body).unwrap();
-    let mut subjects = SUBJECTS.lock().unwrap();
-    *subjects = data;
-}
-
-static SUBJECTS: Mutex<Vec<Arc<Subject>>> = Mutex::new(vec![]);
 
 fn find_subject_by_code(code: Code) -> Option<Arc<Subject>> {
     let subjects = SUBJECTS.lock().unwrap();
@@ -253,7 +216,7 @@ impl ChoiceGenerator {
     pub fn next_choice(&mut self) -> Choice {
         if let Some(choice) = self.iter.next() {
             let commissions: Vec<_> = choice.into_iter().flatten().collect();
-            JsValue::from_serde::<serializer::OptionInfo>(&commissions.into())
+            serde_wasm_bindgen::to_value::<serializer::OptionInfo>(&commissions.into())
                 .unwrap()
                 .into()
         } else {

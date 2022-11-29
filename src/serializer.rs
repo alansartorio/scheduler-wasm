@@ -1,39 +1,16 @@
 use enum_map::EnumMap;
-use scheduler::models::{Combinable, DaysOfTheWeek, SubjectCommision, Week};
+use scheduler::{
+    json_parser::Code,
+    models::{Combinable, DaysOfTheWeek, SubjectCommision, Week},
+};
 use serde::Serialize;
-use std::{collections::HashMap, fmt::Display};
+use std::collections::HashMap;
 
 #[derive(Clone, Serialize)]
 struct Subject {
     name: String,
     credits: u32,
     commission: String,
-}
-
-#[derive(Clone, Copy, Hash, PartialEq, Eq, Serialize)]
-#[serde(into = "String")]
-struct Code {
-    high: u8,
-    low: u8,
-}
-
-impl From<Code> for String {
-    fn from(Code { high, low }: Code) -> Self {
-        format!("{:02}.{:02}", high, low)
-    }
-}
-
-impl Display for Code {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s: String = (*self).into();
-        f.write_str(&s)
-    }
-}
-
-impl From<scheduler::models::Code> for Code {
-    fn from(scheduler::models::Code { high, low }: scheduler::models::Code) -> Self {
-        Self { high, low }
-    }
 }
 
 #[derive(Clone, Copy, Serialize)]
