@@ -1,6 +1,6 @@
 [package]
 name = "scheduler-wasm"
-version = "0.3.4"
+version = "0.3.5"
 authors = ["Alan Sartorio <alan42ga@hotmail.com>"]
 edition = "2021"
 
@@ -22,6 +22,7 @@ serde_json = "1.0.87"
 enum-map = { version = "2.4.1", features = ["serde"] }
 anyhow = "1.0.66"
 serde-wasm-bindgen = "0.4.5"
+itertools = "0.10.5"
 
 [dependencies.web-sys]
 version = "0.3.60"

@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 
+use itertools::Itertools;
 use scheduler::{
     json_parser::{CareerPlan, Code, Entry, SubjectEntry},
     loaders::json_loader,
@@ -37,19 +38,23 @@ pub struct SubjectPlan {
 }
 
 fn get_subjects(career_plan: &CareerPlan) -> impl Iterator<Item = &SubjectEntry> {
-    career_plan.sections.iter().flat_map(|s| {
-        s.terms.iter().flat_map(|t| {
-            t.term.iter().flat_map(|t| {
-                t.entries.entry.iter().filter_map(|e| {
+    career_plan
+        .sections
+        .iter()
+        .flat_map(|s| {
+            s.terms
+                .iter()
+                .flat_map(|t| t.term.iter().flat_map(|t| t.entries.entry.iter()))
+                .chain(s.without_term.iter().flat_map(|v| v.without_term.iter()))
+                .filter_map(|e| {
                     if let Entry::Subject(subject) = e {
                         Some(subject)
                     } else {
                         None
                     }
                 })
-            })
         })
-    })
+        .unique_by(|s| s.code)
 }
 
 #[wasm_bindgen]
