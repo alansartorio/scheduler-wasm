@@ -52,6 +52,7 @@ fn get_subjects(career_plan: &CareerPlan) -> impl Iterator<Item = &SubjectEntry>
     })
 }
 
+#[wasm_bindgen]
 impl SubjectPlan {
     pub fn get_subject_dependencies(&self, code: Code) -> Option<Vec<Code>> {
         get_subjects(&self.data)
