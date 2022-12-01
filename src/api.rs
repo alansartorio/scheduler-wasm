@@ -1,16 +1,9 @@
-use std::sync::{Arc, Mutex};
-
-use itertools::Itertools;
-use scheduler::{
-    json_parser::{CareerPlan, Code, Entry, SubjectEntry},
-    loaders::json_loader,
-    models::Subject,
-};
+use scheduler::{json_parser::CareerPlan, loaders::json_loader};
 use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{window, Request, RequestInit, RequestMode, Response};
 
-use crate::{commissions::Commissions, plan::SubjectPlan, Semester, StringArray, SubjectInfo};
+use crate::{commissions::Commissions, plan::SubjectPlan, Semester};
 
 async fn fetch(url: &str) -> String {
     let mut opts = RequestInit::new();

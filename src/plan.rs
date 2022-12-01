@@ -1,10 +1,6 @@
 use crate::{StringArray, SubjectInfo};
 use itertools::Itertools;
-use scheduler::{
-    json_parser::{CareerPlan, Code, Entry, SubjectEntry},
-    loaders::json_loader,
-    models::Subject,
-};
+use scheduler::json_parser::{CareerPlan, Entry, SubjectEntry};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]

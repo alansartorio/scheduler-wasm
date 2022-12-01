@@ -1,4 +1,4 @@
-use js_sys::{Array, JsString};
+use js_sys::Array;
 use scheduler::{
     models::{Code, Subject, SubjectCommision},
     option_generator::{
@@ -9,7 +9,6 @@ use scheduler::{
 use wasm_bindgen::prelude::*;
 
 use std::{
-    borrow::Borrow,
     collections::HashSet,
     iter::FromIterator,
     ops::{Bound, RangeBounds},

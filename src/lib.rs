@@ -6,19 +6,8 @@ mod serializer;
 mod tests;
 mod utils;
 
-use std::{
-    collections::HashSet,
-    iter::FromIterator,
-    ops::{Bound, RangeBounds},
-    sync::Arc,
-};
-
-use anyhow::{anyhow, Result};
 use js_sys::{Array, JsString};
-use scheduler::{
-    models::{Code, Subject, SubjectCommision},
-    option_generator::filters::{ChoiceIterator, CreditCount, SubjectCount},
-};
+use scheduler::models::Code;
 use wasm_bindgen::prelude::*;
 mod api;
 
