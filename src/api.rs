@@ -10,7 +10,7 @@ use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{window, Request, RequestInit, RequestMode, Response};
 
-use crate::{Semester, StringArray, SubjectInfo};
+use crate::{commissions::Commissions, plan::SubjectPlan, Semester, StringArray, SubjectInfo};
 
 async fn fetch(url: &str) -> String {
     let mut opts = RequestInit::new();
@@ -30,66 +30,6 @@ async fn fetch(url: &str) -> String {
         .unwrap()
 }
 
-pub static SUBJECTS: Mutex<Vec<Arc<Subject>>> = Mutex::new(vec![]);
-
-#[wasm_bindgen]
-pub struct SubjectPlan {
-    data: CareerPlan,
-}
-
-fn get_subjects(career_plan: &CareerPlan) -> impl Iterator<Item = &SubjectEntry> {
-    career_plan
-        .sections
-        .iter()
-        .flat_map(|s| {
-            s.terms
-                .iter()
-                .flat_map(|t| t.term.iter().flat_map(|t| t.entries.entry.iter()))
-                .chain(s.without_term.iter().flat_map(|v| v.without_term.iter()))
-                .filter_map(|e| {
-                    if let Entry::Subject(subject) = e {
-                        Some(subject)
-                    } else {
-                        None
-                    }
-                })
-        })
-        .unique_by(|s| s.code)
-}
-
-#[wasm_bindgen]
-impl SubjectPlan {
-    pub fn get_subject_dependencies(&self, code: String) -> Option<StringArray> {
-        let code = code.parse().unwrap();
-        get_subjects(&self.data).find(|s| s.code == code).map(|s| {
-            s.dependencies
-                .0
-                .iter()
-                .map(|c| c.to_string())
-                .collect::<Vec<_>>()
-                .into()
-        })
-    }
-
-    pub fn get_subjects(&self) -> StringArray {
-        get_subjects(&self.data)
-            .map(|s| s.code.to_string())
-            .collect::<Vec<_>>()
-            .into()
-    }
-
-    pub fn get_subject_info(&self, code: String) -> Option<SubjectInfo> {
-        let code = code.parse().unwrap();
-        get_subjects(&self.data)
-            .find(|s| s.code == code)
-            .map(|s| SubjectInfo {
-                code: s.code,
-                name: s.name.clone(),
-                credits: s.credits,
-            })
-    }
-}
-
 #[wasm_bindgen]
 pub struct Api {
     url_base: String,
@@ -102,7 +42,7 @@ impl Api {
         Self { url_base }
     }
 
-    pub async fn load_subjects_from_api(&self, year: u32, semester: Semester) {
+    pub async fn get_commissions_from_api(&self, year: u32, semester: Semester) -> Commissions {
         let url = format!(
             "{}/commissions?year={}&period={}",
             self.url_base,
@@ -116,8 +56,8 @@ impl Api {
         let body = fetch(&url).await;
 
         let data = json_loader::load_from_string(&body).unwrap();
-        let mut subjects = SUBJECTS.lock().unwrap();
-        *subjects = data;
+
+        Commissions::new(data)
     }
 
     pub async fn get_plan_from_api(&self, plan: &str) -> SubjectPlan {
@@ -125,8 +65,6 @@ impl Api {
 
         let body = fetch(&url).await;
 
-        SubjectPlan {
-            data: serde_json::from_str::<CareerPlan>(&body).unwrap(),
-        }
+        SubjectPlan::new(serde_json::from_str::<CareerPlan>(&body).unwrap())
     }
 }
