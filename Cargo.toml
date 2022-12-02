@@ -1,6 +1,6 @@
 [package]
 name = "scheduler-wasm"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Alan Sartorio <alan42ga@hotmail.com>"]
 edition = "2021"
 
