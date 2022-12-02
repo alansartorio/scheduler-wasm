@@ -48,7 +48,7 @@ impl Commissions {
             })
     }
 
-    pub fn create_generator_builder(self: Commissions) -> GeneratorBuilder {
+    pub fn create_generator_builder(&self) -> GeneratorBuilder {
         GeneratorBuilder::new(self.clone())
     }
 }
