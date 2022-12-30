@@ -1,4 +1,4 @@
-use std::{sync::Arc, cell::RefCell};
+use std::{cell::RefCell, sync::Arc};
 
 use crate::{generator::GeneratorBuilder, SubjectInfo};
 use anyhow::{anyhow, Result};
@@ -19,7 +19,10 @@ impl Commissions {
     }
 
     pub fn find_subject_by_code(&self, code: Code) -> Option<Arc<RefCell<Subject>>> {
-        self.subjects.iter().find(|s| s.borrow().code == code).cloned()
+        self.subjects
+            .iter()
+            .find(|s| s.borrow().code == code)
+            .cloned()
     }
 
     pub fn find_subjects_by_code(&self, codes: Vec<Code>) -> Result<Vec<Arc<RefCell<Subject>>>> {
