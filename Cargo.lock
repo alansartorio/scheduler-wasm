@@ -333,7 +333,7 @@ dependencies = [
 [[package]]
 name = "json_parser"
 version = "0.2.0"
-source = "git+https://github.com/alansartorio/scheduler#e6c1e01da9b2fdd4e695db2dbad34bf7dd4bb90b"
+source = "git+https://github.com/alansartorio/scheduler#df2d155be15f4a6674711563212de59ccdf1463f"
 dependencies = [
  "serde",
  "serde_json",
@@ -524,8 +524,8 @@ checksum = "7b4b9743ed687d4b4bcedf9ff5eaa7398495ae14e61cba0a295704edbc7decde"
 
 [[package]]
 name = "scheduler"
-version = "0.3.0"
-source = "git+https://github.com/alansartorio/scheduler#e6c1e01da9b2fdd4e695db2dbad34bf7dd4bb90b"
+version = "0.3.1"
+source = "git+https://github.com/alansartorio/scheduler#df2d155be15f4a6674711563212de59ccdf1463f"
 dependencies = [
  "colored",
  "enum-map",

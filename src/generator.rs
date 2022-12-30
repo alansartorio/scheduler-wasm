@@ -50,7 +50,7 @@ struct OptionalBound<Idx: PartialOrd>(Option<Idx>);
 impl<Idx: PartialOrd> OptionalBound<Idx> {
     fn to_bound(&self) -> Bound<&Idx> {
         match self.0.as_ref() {
-            Some(bound) => std::ops::Bound::Included(&bound),
+            Some(bound) => std::ops::Bound::Included(bound),
             None => std::ops::Bound::Unbounded,
         }
     }
@@ -70,7 +70,7 @@ impl<Idx: PartialOrd> OptionallyBoundRange<Idx> {
 }
 impl<Idx: PartialOrd> RangeBounds<Idx> for OptionallyBoundRange<Idx> {
     fn start_bound(&self) -> Bound<&Idx> {
-        (&self.start_bound).to_bound()
+        self.start_bound.to_bound()
     }
     fn end_bound(&self) -> Bound<&Idx> {
         self.end_bound.to_bound()

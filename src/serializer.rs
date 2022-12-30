@@ -63,7 +63,7 @@ impl From<Vec<SubjectCommision>> for OptionInfo {
                 let s = c.subject.upgrade().unwrap();
                 let s = s.borrow();
                 (
-                    s.code.into(),
+                    s.code,
                     Subject {
                         commissions: c.names.clone(),
                         name: s.name.clone(),
@@ -82,14 +82,13 @@ impl From<Vec<SubjectCommision>> for OptionInfo {
                 tasks
                     .iter()
                     .map(|task| Task {
-                        subject: task.info.subject.upgrade().unwrap().borrow().code.into(),
+                        subject: task.info.subject.upgrade().unwrap().borrow().code,
                         span: task.span.into(),
                         buildings: task
                             .info
-                            .building
+                            .buildings
                             .iter()
                             .map(|b| b.name.clone())
-                            .flatten()
                             .collect_vec(),
                     })
                     .collect()
