@@ -1,4 +1,5 @@
 use enum_map::EnumMap;
+use itertools::Itertools;
 use scheduler::{
     json_parser::Code,
     models::{Combinable, DaysOfTheWeek, SubjectCommision, Week},
@@ -10,7 +11,7 @@ use std::collections::HashMap;
 struct Subject {
     name: String,
     credits: u32,
-    commission: String,
+    commissions: Vec<String>,
 }
 
 #[derive(Clone, Copy, Serialize)]
@@ -43,7 +44,7 @@ impl From<scheduler::models::Span> for Span {
 #[derive(Clone, Serialize)]
 struct Task {
     subject: Code,
-    building: Option<String>,
+    buildings: Vec<String>,
     //classroom: String,
     span: Span,
 }
@@ -60,10 +61,11 @@ impl From<Vec<SubjectCommision>> for OptionInfo {
             .iter()
             .map(|c| {
                 let s = c.subject.upgrade().unwrap();
+                let s = s.borrow();
                 (
                     s.code.into(),
                     Subject {
-                        commission: c.name.clone(),
+                        commissions: c.names.clone(),
                         name: s.name.clone(),
                         credits: s.credits as u32,
                     },
@@ -80,9 +82,15 @@ impl From<Vec<SubjectCommision>> for OptionInfo {
                 tasks
                     .iter()
                     .map(|task| Task {
-                        subject: task.info.subject.upgrade().unwrap().code.into(),
+                        subject: task.info.subject.upgrade().unwrap().borrow().code.into(),
                         span: task.span.into(),
-                        building: task.info.building.name.clone(),
+                        buildings: task
+                            .info
+                            .building
+                            .iter()
+                            .map(|b| b.name.clone())
+                            .flatten()
+                            .collect_vec(),
                     })
                     .collect()
             });

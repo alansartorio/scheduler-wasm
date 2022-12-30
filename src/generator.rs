@@ -9,6 +9,7 @@ use scheduler::{
 use wasm_bindgen::prelude::*;
 
 use std::{
+    cell::RefCell,
     collections::HashSet,
     iter::FromIterator,
     ops::{Bound, RangeBounds},
@@ -89,11 +90,11 @@ export interface Choice {
     subjects: Map<String, {
             name: string,
             credits: number,
-            commission: string,
+            commissions: string[],
     }>,
     week: Map<DaysOfTheWeek, {
             subject: string,
-            building?: string,
+            building: string[],
             span: {
                 start: Time,
                 end: Time,
@@ -131,8 +132,8 @@ impl ChoiceGenerator {
 #[derive(Debug)]
 pub struct GeneratorBuilder {
     subjects: Commissions,
-    mandatory: Vec<Arc<Subject>>,
-    optional: Vec<Arc<Subject>>,
+    mandatory: Vec<Arc<RefCell<Subject>>>,
+    optional: Vec<Arc<RefCell<Subject>>>,
     collision_exceptions: HashSet<((Code, SubjectCommision), (Code, SubjectCommision))>,
     min_credit_count: Option<u32>,
     max_credit_count: Option<u32>,
@@ -200,15 +201,13 @@ impl GeneratorBuilder {
             let sub = self
                 .subjects
                 .find_subject_by_code(sub_code)
-                .unwrap_or_else(|| panic!("Coud not find subject {}", sub_code));
+                .unwrap_or_else(|| panic!("Coud not find subject {sub_code}"));
+            let sub = sub.borrow();
             sub.commissions
                 .iter()
-                .find(|c| c.name == com_name)
+                .find(|c| c.names.iter().any(|name| name == &com_name))
                 .unwrap_or_else(|| {
-                    panic!(
-                        "Could not find commission {} from subject {}.",
-                        com_name, sub_code
-                    )
+                    panic!("Could not find commission {com_name} from subject {sub_code}.")
                 })
                 .clone()
         };
@@ -225,11 +224,22 @@ impl GeneratorBuilder {
         self
     }
 
+    pub fn optimize(&self) {
+        self.mandatory
+            .iter()
+            .for_each(|sub| sub.borrow_mut().optimize());
+        self.optional
+            .iter()
+            .for_each(|sub| sub.borrow_mut().optimize());
+    }
+
     pub fn build(self) -> ChoiceGenerator {
-        let find_commissions = |subjects: Vec<Arc<Subject>>| {
+        self.optimize();
+
+        let find_commissions = |subjects: Vec<Arc<RefCell<Subject>>>| {
             subjects
                 .into_iter()
-                .map(|sub| (sub.code, sub.commissions.clone()))
+                .map(|sub| (sub.borrow().code, sub.borrow().commissions.clone()))
                 .collect::<Vec<_>>()
         };
         let mandatory = find_commissions(self.mandatory);

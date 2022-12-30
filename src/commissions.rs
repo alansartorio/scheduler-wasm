@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, cell::RefCell};
 
 use crate::{generator::GeneratorBuilder, SubjectInfo};
 use anyhow::{anyhow, Result};
@@ -8,21 +8,21 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct Commissions {
-    subjects: Arc<Vec<Arc<Subject>>>,
+    subjects: Arc<Vec<Arc<RefCell<Subject>>>>,
 }
 
 impl Commissions {
-    pub fn new(subjects: Vec<Arc<Subject>>) -> Self {
+    pub fn new(subjects: Vec<Arc<RefCell<Subject>>>) -> Self {
         Self {
             subjects: Arc::new(subjects),
         }
     }
 
-    pub fn find_subject_by_code(&self, code: Code) -> Option<Arc<Subject>> {
-        self.subjects.iter().find(|s| s.code == code).cloned()
+    pub fn find_subject_by_code(&self, code: Code) -> Option<Arc<RefCell<Subject>>> {
+        self.subjects.iter().find(|s| s.borrow().code == code).cloned()
     }
 
-    pub fn find_subjects_by_code(&self, codes: Vec<Code>) -> Result<Vec<Arc<Subject>>> {
+    pub fn find_subjects_by_code(&self, codes: Vec<Code>) -> Result<Vec<Arc<RefCell<Subject>>>> {
         codes
             .into_iter()
             //.map(|c| c.parse().unwrap())
@@ -40,11 +40,11 @@ impl Commissions {
         let code: Code = code.parse().unwrap();
         self.subjects
             .iter()
-            .find(|s| s.code == code)
+            .find(|s| s.borrow().code == code)
             .map(|s| SubjectInfo {
-                code: s.code,
-                name: s.name.clone(),
-                credits: s.credits,
+                code: s.borrow().code,
+                name: s.borrow().name.clone(),
+                credits: s.borrow().credits,
             })
     }
 
