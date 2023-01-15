@@ -1,5 +1,6 @@
 use crate::{StringArray, SubjectInfo};
 use itertools::Itertools;
+use js_sys::{Object, Reflect};
 use scheduler::json_parser::{CareerPlan, Entry, SubjectEntry};
 use wasm_bindgen::prelude::*;
 
@@ -64,5 +65,36 @@ impl SubjectPlan {
                 name: s.name.clone(),
                 credits: s.credits,
             })
+    }
+
+    pub fn get_subject_terms(&self, code: String) -> Vec<Object> {
+        let code = code.parse().unwrap();
+        self.data
+            .sections
+            .iter()
+            .flat_map(|s| {
+                s.terms.iter().flat_map(|t| {
+                    t.term.iter().filter_map(|t| {
+                        if t.entries.entry.iter().any(|e| {
+                            if let Entry::Subject(subject) = e && subject.code == code {
+                                true
+                            } else {
+                                false
+                            }
+                        }) {
+                            Some(&t.term)
+                        } else {
+                            None
+                        }
+                    })
+                })
+            })
+            .map(|term| {
+                let js_term = Object::new();
+                Reflect::set(&js_term, &"year".into(), &term.year.into()).unwrap();
+                Reflect::set(&js_term, &"period".into(), &term.period.into()).unwrap();
+                js_term
+            })
+            .collect_vec()
     }
 }
