@@ -22,8 +22,8 @@ fn get_subjects(career_plan: &CareerPlan) -> impl Iterator<Item = &SubjectEntry>
         .flat_map(|s| {
             s.terms
                 .iter()
-                .flat_map(|t| t.term.iter().flat_map(|t| t.entries.entry.iter()))
-                .chain(s.without_term.iter().flat_map(|v| v.without_term.iter()))
+                .flat_map(|t| t.entries.iter())
+                .chain(s.without_term.iter())
                 .filter_map(|e| {
                     if let Entry::Subject(subject) = e {
                         Some(subject)
@@ -41,7 +41,6 @@ impl SubjectPlan {
         let code = code.parse().unwrap();
         get_subjects(&self.data).find(|s| s.code == code).map(|s| {
             s.dependencies
-                .0
                 .iter()
                 .map(|c| c.to_string())
                 .collect::<Vec<_>>()
@@ -74,19 +73,17 @@ impl SubjectPlan {
             .iter()
             .flat_map(|s| {
                 s.terms.iter().flat_map(|t| {
-                    t.term.iter().filter_map(|t| {
-                        if t.entries.entry.iter().any(|e| {
-                            if let Entry::Subject(subject) = e && subject.code == code {
-                                true
-                            } else {
-                                false
-                            }
-                        }) {
-                            Some(&t.term)
+                    if t.entries.iter().any(|e| {
+                        if let Entry::Subject(subject) = e && subject.code == code {
+                            true
                         } else {
-                            None
+                            false
                         }
-                    })
+                    }) {
+                        Some(&t.term)
+                    } else {
+                        None
+                    }
                 })
             })
             .map(|term| {
