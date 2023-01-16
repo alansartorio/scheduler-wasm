@@ -3,7 +3,7 @@ use scheduler::{
     models::{Code, Subject, SubjectCommision},
     option_generator::{
         filters::{ChoiceIterator, CreditCount, SubjectCount},
-        generate,
+        OptionGenerator,
     },
 };
 use wasm_bindgen::prelude::*;
@@ -245,9 +245,16 @@ impl GeneratorBuilder {
         let mandatory = find_commissions(self.mandatory);
         let optional = find_commissions(self.optional);
 
+        let mut generator = OptionGenerator::default();
+        generator
+            .set_mandatory(mandatory)
+            .set_optional(optional)
+            .set_collission_exceptions(self.collision_exceptions);
+
         ChoiceGenerator {
             iter: Box::new(
-                generate(mandatory, optional, self.collision_exceptions)
+                generator
+                    .generate()
                     .filter_choices(SubjectCount::new(OptionallyBoundRange::new(
                         self.min_subject_count,
                         self.max_subject_count,
