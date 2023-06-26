@@ -1,3 +1,4 @@
+#![feature(let_chains)]
 mod commissions;
 mod generator;
 mod plan;
