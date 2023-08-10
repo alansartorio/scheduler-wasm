@@ -37,7 +37,7 @@ impl Api {
 
     pub async fn get_commissions_from_api(&self, year: u32, semester: Semester) -> Commissions {
         let url = format!(
-            "{}/commissions?year={}&period={}",
+            "{}/commissions/GRADUATE-{}-{}.json",
             self.url_base,
             year,
             match semester {
@@ -54,7 +54,7 @@ impl Api {
     }
 
     pub async fn get_plan_from_api(&self, plan: &str) -> SubjectPlan {
-        let url = format!("{}/plan?name={}", self.url_base, plan);
+        let url = format!("{}/plan/{}.json", self.url_base, plan);
 
         let body = fetch(&url).await;
 
