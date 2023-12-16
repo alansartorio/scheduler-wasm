@@ -455,7 +455,7 @@ dependencies = [
 
 [[package]]
 name = "scheduler-wasm"
-version = "0.6.4"
+version = "0.7.0"
 dependencies = [
  "anyhow",
  "console_error_panic_hook",

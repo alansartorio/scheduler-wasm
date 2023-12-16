@@ -35,7 +35,11 @@ impl Api {
         Self { url_base }
     }
 
-    pub async fn get_commissions_from_api(&self, year: u32, semester: Semester) -> Commissions {
+    pub async fn get_commissions_from_api(
+        &self,
+        year: u32,
+        semester: Semester,
+    ) -> Option<Commissions> {
         let url = format!(
             "{}/commissions/GRADUATE-{}-{}.json",
             self.url_base,
@@ -48,16 +52,14 @@ impl Api {
 
         let body = fetch(&url).await;
 
-        let data = json_loader::load_from_string(&body).unwrap();
-
-        Commissions::new(data)
+        json_loader::load_from_string(&body).ok().map(Commissions::new)
     }
 
-    pub async fn get_plan_from_api(&self, plan: &str) -> SubjectPlan {
+    pub async fn get_plan_from_api(&self, plan: &str) -> Option<SubjectPlan> {
         let url = format!("{}/plan/{}.json", self.url_base, plan);
 
         let body = fetch(&url).await;
 
-        SubjectPlan::new(serde_json::from_str::<CareerPlan>(&body).unwrap())
+        serde_json::from_str::<CareerPlan>(&body).ok().map(SubjectPlan::new)
     }
 }
