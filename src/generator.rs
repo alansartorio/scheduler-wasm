@@ -94,7 +94,7 @@ export interface Choice {
     }>,
     week: Map<DaysOfTheWeek, {
             subject: string,
-            building: string[],
+            buildings: string[],
             span: {
                 start: Time,
                 end: Time,
